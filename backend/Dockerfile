@@ -18,8 +18,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el código de la aplicación
 COPY . .
 
+# Hacer el script ejecutable
+RUN chmod +x start.sh
+
 # Exponer el puerto
 EXPOSE 8000
 
-# Comando para iniciar la aplicación con más logging y sin reload
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "debug", "--no-access-log"] 
+# Usar el script de inicio
+CMD ["./start.sh"] 
