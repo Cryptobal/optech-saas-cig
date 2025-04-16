@@ -1,8 +1,15 @@
 from logging.config import fileConfig
+import os
+import sys
+from pathlib import Path
+
+# Añadir el directorio raíz al PYTHONPATH
+root_path = str(Path(__file__).parent.parent.absolute())
+sys.path.insert(0, root_path)
+
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
-import os
 from dotenv import load_dotenv
 
 from app.db.session import Base
