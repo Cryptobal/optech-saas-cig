@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.db.session import engine, Base
 from app.models.user import User
 from app.routers import auth, tenants
-from app.services.auth import get_password_hash
+from app.core.security import get_password_hash
 
 # Configuración de logging
 logging.basicConfig(
