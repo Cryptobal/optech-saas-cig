@@ -1,117 +1,76 @@
-# Base Tenants - Sistema de Gestión Operativa para Empresas de Seguridad (GARD-SaaS)
+# GARD SaaS - Frontend
 
-Sistema SaaS diseñado específicamente para la gestión operativa de empresas de seguridad, enfocado en optimizar la administración de guardias, instalaciones y turnos.
+Frontend para el sistema de gestión operativa para empresas de seguridad (GARD SaaS), desarrollado con Next.js 14, TailwindCSS y shadcn/ui.
 
-## Tecnologías Principales
+## Características
 
-### Backend
-- FastAPI
-- SQLAlchemy
-- Alembic
-- PostgreSQL
-- Python 3.9+
+- 🎨 Diseño profesional, minimalista, elegante con modo oscuro por defecto
+- 🔐 Autenticación completa (Login/Register/Olvido de contraseña)
+- 📱 Completamente responsivo (mobile-first)
+- ⚡ Transiciones y animaciones con Framer Motion
+- 🧩 Componentes reutilizables
+- 💻 Dashboard interactivo con widgets
+- 🔍 Barra de búsqueda global (Command Palette - ⌘K)
+- 🌙 Tema oscuro por defecto
 
-## Estructura del Proyecto
+## Tecnologías utilizadas
 
-```
-.
-├── backend/          # Código del backend
-├── SPECS.md         # Especificaciones detalladas del sistema
-└── .gitignore       # Configuración de archivos ignorados por git
-```
+- [Next.js 14](https://nextjs.org/) - Framework React con App Router
+- [TailwindCSS](https://tailwindcss.com/) - Framework CSS utilitario
+- [shadcn/ui](https://ui.shadcn.com/) - Componentes de UI reutilizables
+- [Framer Motion](https://www.framer.com/motion/) - Biblioteca de animaciones
+- [React Hook Form](https://react-hook-form.com/) - Manejo de formularios
+- [Zod](https://zod.dev/) - Validación de esquemas
 
-## Configuración del Entorno de Desarrollo
+## Instalación
 
-1. Clonar el repositorio:
+1. Clonar el repositorio
+2. Instalar dependencias
 ```bash
-git clone https://github.com/yourusername/base-tenants.git
-cd base-tenants
-```
-
-2. Crear y activar entorno virtual:
-```bash
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-```
-
-3. Instalar dependencias:
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-4. Configurar variables de entorno:
-```bash
-cp .env.example .env
-# Editar .env con tus configuraciones
-```
-
-5. Ejecutar migraciones:
-```bash
-alembic upgrade head
-```
-
-6. Iniciar el servidor de desarrollo:
-```bash
-uvicorn app.main:app --reload
-```
-
-## Documentación
-
-Para más detalles sobre el sistema, consulta [SPECS.md](SPECS.md).
-
-## Licencia
-
-Este proyecto está bajo la Licencia MIT.
-
-## Despliegue
-
-### Frontend (Vercel)
-
-1. Fork o clone este repositorio
-2. Conecta tu cuenta de Vercel con GitHub
-3. Importa el repositorio en Vercel
-4. Configura las variables de entorno:
-   - `NEXT_PUBLIC_API_URL`: URL del backend desplegado en Railway
-
-### Backend (Railway)
-
-1. Crear una cuenta en Railway
-2. Conectar con GitHub
-3. Crear un nuevo proyecto seleccionando este repositorio
-4. Agregar un servicio PostgreSQL
-5. Configurar las variables de entorno:
-   - `DATABASE_URL`: URL de conexión a PostgreSQL (automático en Railway)
-   - `JWT_SECRET`: Clave secreta para JWT
-   - `CORS_ORIGINS`: URLs permitidas (incluir la URL de Vercel)
-   - Otras variables según `.env.example`
-
-### Base de Datos
-
-La base de datos se inicializará automáticamente con las migraciones al desplegar en Railway.
-El superadministrador se creará con las credenciales especificadas en las variables de entorno:
-
-- `FIRST_SUPERADMIN_EMAIL`
-- `FIRST_SUPERADMIN_PASSWORD`
-
-## Desarrollo Local
-
-### Frontend
-```bash
-cd frontend
 npm install
+```
+3. Iniciar el servidor de desarrollo
+```bash
 npm run dev
 ```
+4. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
 
-### Backend
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+## Estructura del proyecto
+
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/            # Rutas de autenticación
+│   │   │   ├── login
+│   │   │   ├── register
+│   │   │   └── forgot-password
+│   │   ├── (dashboard)/       # Rutas del dashboard
+│   │   │   ├── dashboard
+│   │   │   ├── clients
+│   │   │   ├── guards
+│   │   │   └── locations
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── auth/              # Componentes de autenticación
+│   │   ├── dashboard/         # Componentes del dashboard
+│   │   ├── shared/            # Componentes compartidos
+│   │   └── ui/                # Componentes de UI (shadcn)
+│   └── lib/
+│       ├── animations/        # Utilidades de animación
+│       └── utils.ts           # Funciones de utilidad
+└── ...
 ```
 
-## Variables de Entorno
+## Scripts disponibles
 
-Copia `.env.example` a `.env` en ambos directorios (frontend y backend) y configura las variables necesarias. 
+- `npm run dev` - Inicia el servidor de desarrollo
+- `npm run build` - Construye la aplicación para producción
+- `npm run start` - Inicia la aplicación en modo producción
+- `npm run lint` - Ejecuta el linter para verificar errores
+
+## Estado del proyecto
+
+Este proyecto es un MVP (Producto Mínimo Viable) con las funcionalidades básicas implementadas. El backend está en desarrollo separado.
