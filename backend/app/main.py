@@ -23,9 +23,10 @@ app = FastAPI(
 )
 
 # CORS
+origins = settings.BACKEND_CORS_ORIGINS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,14 +39,18 @@ app.include_router(tenants.router, prefix=f"{settings.API_V1_STR}/tenants", tags
 # Endpoints de salud y debug
 @app.get("/health")
 async def health_check():
-    return {"status": "OK"}
+    return {
+        "status": "OK",
+        "environment": settings.ENVIRONMENT,
+        "debug": settings.DEBUG
+    }
 
 @app.get("/cors-debug")
 async def cors_debug():
     return {
         "message": "CORS funcionando correctamente",
-        "origins": settings.BACKEND_CORS_ORIGINS,
-        "environment": "development" if settings.DEBUG else "production"
+        "origins": origins,
+        "environment": settings.ENVIRONMENT
     }
 
 # Manejadores de errores
@@ -81,5 +86,8 @@ async def startup_event():
         db.close()
     
     # Log de configuración
-    logger.info(f"Entorno: {'development' if settings.DEBUG else 'production'}")
-    logger.info(f"Orígenes CORS: {settings.BACKEND_CORS_ORIGINS}") 
+    logger.info(f"Entorno: {settings.ENVIRONMENT}")
+    logger.info(f"Debug: {settings.DEBUG}")
+    logger.info(f"Orígenes CORS configurados: {origins}")
+    if '*' in origins:
+        logger.warning("ADVERTENCIA: CORS está configurado para permitir todos los orígenes (*). Esto no es recomendado en producción.") 
