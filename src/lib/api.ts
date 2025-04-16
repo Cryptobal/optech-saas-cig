@@ -1,4 +1,9 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Forzamos HTTPS para la URL de la API
+let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Aseguramos que siempre usamos HTTPS en producción
+if (API_URL.startsWith('http://') && !API_URL.includes('localhost')) {
+  API_URL = API_URL.replace('http://', 'https://');
+}
 
 export const api = {
   auth: {
