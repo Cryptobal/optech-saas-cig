@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "OpTech SaaS"
     API_V1_STR: str = "/api/v1"
     
-    # CORS
-    CORS_ORIGINS: str = ""  # Lista de orígenes separados por coma
+    # CORS - Default origins para desarrollo y producción
+    CORS_ORIGINS: str = "https://gard-saas-git-main-gard-security.vercel.app,http://localhost:3000,http://localhost:3001,http://localhost:3002"
     
     @property
     def BACKEND_CORS_ORIGINS(self) -> List[str]:
