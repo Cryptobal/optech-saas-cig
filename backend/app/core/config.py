@@ -13,7 +13,12 @@ class Settings(BaseSettings):
     def BACKEND_CORS_ORIGINS(self) -> List[str]:
         if not self.CORS_ORIGINS:
             return []
-        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        # Limpiamos los orígenes de caracteres no deseados y espacios
+        origins = [
+            origin.strip().rstrip(';').rstrip(',')
+            for origin in self.CORS_ORIGINS.split(",")
+            if origin.strip()
+        ]
         # Validar que no se use '*' en producción
         if not self.DEBUG and '*' in origins:
             return []  # En producción, si se detecta '*', retornamos lista vacía por seguridad
