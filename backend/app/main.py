@@ -62,6 +62,11 @@ def root():
     return {"message": "Bienvenido a GARD-SaaS API"}
 
 
-@app.get(f"{settings.API_V1_STR}/health")
+@app.get("/health")
 async def health_check():
+    return {"status": "healthy"}
+
+
+@app.get(f"{settings.API_V1_STR}/health")
+async def health_check_v1():
     return {"status": "healthy"} 

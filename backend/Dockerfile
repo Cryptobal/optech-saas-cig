@@ -25,12 +25,13 @@ echo "Current directory: $(pwd)"\n\
 echo "Files in current directory: $(ls -la)"\n\
 echo "Environment variables:"\n\
 env\n\
-echo "Starting uvicorn on port ${PORT:-8000}..."\n\
-exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --log-level debug' > /app/start.sh && \
+echo "Starting uvicorn..."\n\
+exec uvicorn app.main:app --host 0.0.0.0 --port $PORT --log-level debug' > /app/start.sh && \
 chmod +x /app/start.sh
 
-# Exponer el puerto
-EXPOSE ${PORT:-8000}
+# Exponer el puerto (usando la variable PORT)
+ENV PORT=8000
+EXPOSE $PORT
 
 # Usar el script de inicio
 CMD ["/app/start.sh"] 
