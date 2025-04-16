@@ -7,7 +7,13 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    CORS_ORIGINS: str = ""  # Lista de orígenes separados por coma
+    
+    @property
+    def BACKEND_CORS_ORIGINS(self) -> List[str]:
+        if not self.CORS_ORIGINS:
+            return []
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
     
     # Database
     DATABASE_URL: str
