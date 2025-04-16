@@ -1,108 +1,88 @@
-# GARD-SaaS Backend
+# Backend SaaS
 
-Backend para la aplicación GARD-SaaS desarrollado con FastAPI, SQLAlchemy 2, Alembic y Pydantic v2.
+Backend desarrollado con FastAPI para un sistema SaaS multi-tenant.
 
 ## Requisitos
 
-* Python 3.11.x
-* PostgreSQL (Neon)
+- Python 3.8+
+- PostgreSQL (Neon)
+- pip
 
 ## Instalación
 
 1. Clonar el repositorio
-   ```bash
-   git clone git@github.com:Cryptobal/gard_saas.git
-   cd gard_saas/backend
-   ```
+2. Crear un entorno virtual:
+```bash
+python -m venv venv
+source venv/bin/activate  # En Windows: venv\Scripts\activate
+```
 
-2. Crear un entorno virtual
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
-   ```
+3. Instalar dependencias:
+```bash
+pip install -r requirements.txt
+```
 
-3. Instalar dependencias
-   ```bash
-   pip install -r requirements.txt
-   ```
+4. Copiar el archivo de entorno:
+```bash
+cp .env.example .env
+```
 
-4. Configurar variables de entorno
-   El archivo `.env` ya debe estar configurado con:
-   ```
-   DATABASE_URL=postgresql://neondb_owner:npg_As5bQjz7qpKv@ep-soft-king-a4o2tbut-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
-   FIRST_SUPERADMIN_EMAIL=carlos.irigoyen@gmail.com
-   FIRST_SUPERADMIN_PASSWORD=Admin123
-   SECRET_KEY=VKoLUqp5TrhMyuC7zxpPSs6Bzo5kNxEpzMi62LQAdEo
-   ALGORITHM=HS256
-   ACCESS_TOKEN_EXPIRE_MINUTES=60
-   CORS_ORIGINS=*
-   ```
+5. Configurar las variables en `.env`
 
-## Ejecución
+## Ejecución Local
 
-1. Ejecutar el servidor
-   ```bash
-   cd backend
-   uvicorn app.main:app --reload --port 8000
-   ```
+```bash
+uvicorn app.main:app --reload
+```
 
-2. Acceder a la documentación de la API
-   - Abrir en el navegador: http://localhost:8000/docs
+La API estará disponible en `http://localhost:8000`
 
-## Migraciones con Alembic
+## Despliegue en Railway
 
-1. Inicializar Alembic (solo la primera vez)
-   ```bash
-   cd backend
-   alembic init migrations
-   ```
+El backend está desplegado en Railway: [https://optech-saas-cig-production.up.railway.app/](https://optech-saas-cig-production.up.railway.app/)
 
-2. Generar una migración
-   ```bash
-   alembic revision --autogenerate -m "descripción de la migración"
-   ```
+### Variables de Entorno en Railway
 
-3. Aplicar migraciones
-   ```bash
-   alembic upgrade head
-   ```
+Configurar las siguientes variables en Railway:
 
-## Uso de la API
+- `DATABASE_URL`: URL de conexión a Neon
+- `SECRET_KEY`: Clave secreta para JWT
+- `FIRST_SUPERADMIN_EMAIL`: Email del superadmin
+- `FIRST_SUPERADMIN_PASSWORD`: Contraseña del superadmin
+- `CORS_ORIGINS`: Orígenes permitidos (separados por coma)
+- `DEBUG`: False para producción
+
+### Migraciones
+
+Para ejecutar las migraciones en Railway:
+
+```bash
+alembic upgrade head
+```
+
+## Documentación
+
+- Swagger UI: [https://optech-saas-cig-production.up.railway.app/docs](https://optech-saas-cig-production.up.railway.app/docs)
+- ReDoc: [https://optech-saas-cig-production.up.railway.app/redoc](https://optech-saas-cig-production.up.railway.app/redoc)
+
+## Endpoints principales
 
 ### Autenticación
+- `POST /api/v1/auth/login` - Login de usuario
+- `GET /api/v1/auth/me` - Información del usuario actual
 
-1. Login como superadmin
-   ```
-   POST /api/v1/auth/login
-   
-   {
-     "username": "carlos.irigoyen@gmail.com",
-     "password": "Admin123"
-   }
-   ```
+### Tenants (requiere superadmin)
+- `GET /api/v1/tenants` - Listar tenants
+- `POST /api/v1/tenants` - Crear tenant
+- `GET /api/v1/tenants/{id}` - Obtener tenant
+- `PUT /api/v1/tenants/{id}` - Actualizar tenant
+- `DELETE /api/v1/tenants/{id}` - Eliminar tenant
 
-2. Usar el token JWT recibido en las siguientes peticiones en el header:
-   ```
-   Authorization: Bearer {token}
-   ```
+## Variables de entorno
 
-### Endpoints Disponibles
-
-#### Autenticación
-- `POST /api/v1/auth/login` - Iniciar sesión y obtener token JWT
-
-#### Usuarios (requiere superadmin)
-- `GET /api/v1/users/` - Listar todos los usuarios
-- `POST /api/v1/users/` - Crear usuario
-- `GET /api/v1/users/me` - Ver perfil propio
-- `PUT /api/v1/users/me` - Actualizar perfil propio
-- `GET /api/v1/users/{user_id}` - Ver usuario específico
-- `PUT /api/v1/users/{user_id}` - Actualizar usuario
-- `DELETE /api/v1/users/{user_id}` - Eliminar usuario
-
-#### Tenants (requiere superadmin)
-- `GET /api/v1/tenants/` - Listar todos los tenants
-- `POST /api/v1/tenants/` - Crear tenant
-- `GET /api/v1/tenants/{tenant_id}` - Ver tenant específico
-- `PUT /api/v1/tenants/{tenant_id}` - Actualizar tenant
-- `DELETE /api/v1/tenants/{tenant_id}` - Eliminar tenant 
+- `DATABASE_URL` - URL de conexión a Neon
+- `SECRET_KEY` - Clave secreta para JWT
+- `FIRST_SUPERADMIN_EMAIL` - Email del primer superadmin
+- `FIRST_SUPERADMIN_PASSWORD` - Contraseña del primer superadmin
+- `CORS_ORIGINS` - Orígenes permitidos (separados por coma)
+- `DEBUG` - Modo debug (True/False) 

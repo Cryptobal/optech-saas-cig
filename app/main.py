@@ -1,72 +1,85 @@
 import logging
-
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
-from app.api.v1.api import api_router
 from app.core.config import settings
-from app import crud, schemas
-from app.db.session import engine, get_db
-from app.db.base import Base
+from app.db.session import engine, Base
+from app.models.user import User
+from app.routers import auth, tenants
+from app.services.auth import get_password_hash
 
-logging.basicConfig(level=logging.INFO)
+# Configuración de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="GARD-SaaS API",
-    description="API para la aplicación GARD-SaaS",
-    version="0.1.0",
+    title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Configurar CORS
-if settings.CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.CORS_ORIGINS]
-        if isinstance(settings.CORS_ORIGINS, list)
-        else ["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routers
+app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(tenants.router, prefix=f"{settings.API_V1_STR}/tenants", tags=["tenants"])
+
+# Endpoints de salud y debug
+@app.get("/health")
+async def health_check():
+    return {"status": "OK"}
+
+@app.get("/cors-debug")
+async def cors_debug():
+    return {
+        "message": "CORS funcionando correctamente",
+        "origins": settings.BACKEND_CORS_ORIGINS,
+        "environment": "development" if settings.DEBUG else "production"
+    }
+
+# Manejadores de errores
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
     )
 
-# Incluir rutas de API
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
-
+# Eventos de inicio
 @app.on_event("startup")
-def startup_event():
-    # Crear tablas si no existen
-    logger.info("Creando tablas en la base de datos...")
+async def startup_event():
+    # Crear tablas
     Base.metadata.create_all(bind=engine)
     
     # Crear superadmin si no existe
-    db = next(get_db())
-    user = crud.user.get_by_email(db, email=settings.FIRST_SUPERADMIN_EMAIL)
-    if not user:
-        logger.info(f"Creando superadmin: {settings.FIRST_SUPERADMIN_EMAIL}")
-        user_in = schemas.UserCreate(
-            email=settings.FIRST_SUPERADMIN_EMAIL,
-            password=settings.FIRST_SUPERADMIN_PASSWORD,
-            full_name="Super Admin",
-            is_superuser=True,
-        )
-        crud.user.create(db, obj_in=user_in)
-    db.close()
-
-
-@app.get("/")
-def root():
-    return {"message": "Bienvenido a GARD-SaaS API"}
-
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
-
-
-@app.get(f"{settings.API_V1_STR}/health")
-async def health_check_v1():
-    return {"status": "healthy"} 
+    from app.db.session import SessionLocal
+    db = SessionLocal()
+    try:
+        superadmin = db.query(User).filter(User.email == settings.FIRST_SUPERADMIN_EMAIL).first()
+        if not superadmin:
+            superadmin = User(
+                email=settings.FIRST_SUPERADMIN_EMAIL,
+                hashed_password=get_password_hash(settings.FIRST_SUPERADMIN_PASSWORD),
+                is_superadmin=True,
+                is_active=True
+            )
+            db.add(superadmin)
+            db.commit()
+            logger.info("Superadmin creado exitosamente")
+    finally:
+        db.close()
+    
+    # Log de configuración
+    logger.info(f"Entorno: {'development' if settings.DEBUG else 'production'}")
+    logger.info(f"Orígenes CORS: {settings.BACKEND_CORS_ORIGINS}") 

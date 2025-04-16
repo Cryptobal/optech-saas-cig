@@ -1,34 +1,23 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
-
-# Propiedades compartidas
 class TenantBase(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    is_active: Optional[bool] = True
-
-
-# Propiedades para crear tenant
-class TenantCreate(TenantBase):
     name: str
+    domain: str
+    is_active: bool = True
 
-
-# Propiedades para actualizar tenant
-class TenantUpdate(TenantBase):
+class TenantCreate(TenantBase):
     pass
 
+class TenantUpdate(TenantBase):
+    name: str | None = None
+    domain: str | None = None
+    is_active: bool | None = None
 
-# Propiedades en la respuesta
 class TenantInDBBase(TenantBase):
     id: int
-    slug: str
 
     class Config:
         from_attributes = True
 
-
-# Propiedades para devolver al API
 class Tenant(TenantInDBBase):
     pass 
