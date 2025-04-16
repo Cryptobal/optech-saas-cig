@@ -1,6 +1,7 @@
 from typing import List
 from pydantic_settings import BaseSettings
 from pydantic import AnyHttpUrl, validator
+import re
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "OpTech SaaS"
@@ -13,15 +14,13 @@ class Settings(BaseSettings):
     def BACKEND_CORS_ORIGINS(self) -> List[str]:
         if not self.CORS_ORIGINS:
             return []
-        # Limpiamos los orígenes de caracteres no deseados y espacios
-        origins = [
-            origin.strip().rstrip(';').rstrip(',')
-            for origin in self.CORS_ORIGINS.split(",")
-            if origin.strip()
-        ]
-        # Validar que no se use '*' en producción
-        if not self.DEBUG and '*' in origins:
-            return []  # En producción, si se detecta '*', retornamos lista vacía por seguridad
+        # Limpiamos los orígenes de cualquier carácter no deseado
+        origins = []
+        for origin in self.CORS_ORIGINS.split(","):
+            # Limpiamos el origen de cualquier carácter que no sea parte de una URL válida
+            cleaned = re.sub(r'[;,\s]+$', '', origin.strip())
+            if cleaned and cleaned != '*':  # Ignoramos '*' en producción
+                origins.append(cleaned)
         return origins
     
     # Database
