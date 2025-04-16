@@ -12,12 +12,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     
     # CORS
-    CORS_ORIGINS: str
+    CORS_ORIGINS: Union[str, List[str]]
 
     @validator("CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
-        if isinstance(v, str) and v != "*":
-            return [i.strip() for i in v.split(",")]
+        if isinstance(v, str):
+            if "," in v:
+                return [i.strip() for i in v.split(",")]
+            return [v.strip()]
         return v
 
     # DATABASE
