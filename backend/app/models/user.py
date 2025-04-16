@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import Base
 from app.schemas.user import UserCreate
-from app.services.auth import get_password_hash
+from app.core.security import get_password_hash
 
 class User(Base):
     __tablename__ = "users"
