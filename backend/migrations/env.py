@@ -1,17 +1,18 @@
-from logging.config import fileConfig
 import os
 import sys
 from pathlib import Path
 
 # Añadir el directorio raíz al PYTHONPATH
-root_path = str(Path(__file__).parent.parent.absolute())
-sys.path.insert(0, root_path)
+current_path = Path(__file__).parent.parent.absolute()
+sys.path.insert(0, str(current_path))
 
+from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from dotenv import load_dotenv
 
+# Importar Base después de configurar PYTHONPATH
 from app.db.session import Base
 from app.models import *  # Importa todos los modelos
 
@@ -22,7 +23,9 @@ load_dotenv()
 config = context.config
 
 # override sqlalchemy.url from environment
-config.set_main_option('sqlalchemy.url', os.getenv('DATABASE_URL'))
+db_url = os.getenv('DATABASE_URL')
+if db_url:
+    config.set_main_option('sqlalchemy.url', db_url)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:
