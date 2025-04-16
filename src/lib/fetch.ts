@@ -8,13 +8,21 @@ export async function fetchWithAuth(
 ) {
   const token = localStorage.getItem('token');
   
+  // Forzar HTTPS en producción
+  let secureUrl = url;
+  if (secureUrl.startsWith('http://') && !secureUrl.includes('localhost')) {
+    secureUrl = secureUrl.replace('http://', 'https://');
+  }
+  
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
     ...options.headers,
   };
 
-  const response = await fetch(url, {
+  console.log('Fetching URL:', secureUrl); // Para depuración
+
+  const response = await fetch(secureUrl, {
     ...options,
     headers,
   });

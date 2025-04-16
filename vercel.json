@@ -6,6 +6,6 @@
   "outputDirectory": ".next",
   "regions": ["sfo1"],
   "env": {
-    "NEXT_PUBLIC_API_URL": "${RAILWAY_STATIC_URL}"
+    "NEXT_PUBLIC_API_URL": "https://optech-saas-cig-production.up.railway.app"
   }
 } 
