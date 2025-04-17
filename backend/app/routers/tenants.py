@@ -1,9 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from app.db.session import get_db
-from app.models.tenant import Tenant
+from app.models.tenant import Tenant as TenantModel
 from app.schemas.tenant import TenantCreate, TenantUpdate, Tenant
 from app.services.auth import get_current_superadmin
 
@@ -14,12 +15,14 @@ def create_tenant(
     *,
     db: Session = Depends(get_db),
     tenant_in: TenantCreate,
-    current_user: Tenant = Depends(get_current_superadmin),
+    current_user: TenantModel = Depends(get_current_superadmin),
 ):
-    tenant = Tenant(
-        name=tenant_in.name,
-        domain=tenant_in.domain,
-        is_active=tenant_in.is_active,
+    tenant = TenantModel(
+        nombre=tenant_in.nombre,
+        rut=tenant_in.rut,
+        estado=tenant_in.estado,
+        plan_subscripcion=tenant_in.plan_subscripcion,
+        configuracion=tenant_in.configuracion,
     )
     db.add(tenant)
     db.commit()
@@ -31,23 +34,23 @@ def read_tenants(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: Tenant = Depends(get_current_superadmin),
+    current_user: TenantModel = Depends(get_current_superadmin),
 ):
-    tenants = db.query(Tenant).offset(skip).limit(limit).all()
+    tenants = db.query(TenantModel).offset(skip).limit(limit).all()
     return tenants
 
 @router.get("/{tenant_id}", response_model=Tenant)
 def read_tenant(
     *,
     db: Session = Depends(get_db),
-    tenant_id: int,
-    current_user: Tenant = Depends(get_current_superadmin),
+    tenant_id: UUID,
+    current_user: TenantModel = Depends(get_current_superadmin),
 ):
-    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    tenant = db.query(TenantModel).filter(TenantModel.id == tenant_id).first()
     if not tenant:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found",
+            detail="Tenant no encontrado",
         )
     return tenant
 
@@ -55,15 +58,15 @@ def read_tenant(
 def update_tenant(
     *,
     db: Session = Depends(get_db),
-    tenant_id: int,
+    tenant_id: UUID,
     tenant_in: TenantUpdate,
-    current_user: Tenant = Depends(get_current_superadmin),
+    current_user: TenantModel = Depends(get_current_superadmin),
 ):
-    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    tenant = db.query(TenantModel).filter(TenantModel.id == tenant_id).first()
     if not tenant:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found",
+            detail="Tenant no encontrado",
         )
     
     update_data = tenant_in.dict(exclude_unset=True)
@@ -79,14 +82,14 @@ def update_tenant(
 def delete_tenant(
     *,
     db: Session = Depends(get_db),
-    tenant_id: int,
-    current_user: Tenant = Depends(get_current_superadmin),
+    tenant_id: UUID,
+    current_user: TenantModel = Depends(get_current_superadmin),
 ):
-    tenant = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    tenant = db.query(TenantModel).filter(TenantModel.id == tenant_id).first()
     if not tenant:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tenant not found",
+            detail="Tenant no encontrado",
         )
     db.delete(tenant)
     db.commit()
