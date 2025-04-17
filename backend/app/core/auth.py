@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
-from uuid import UUID
+from uuid import uuid4
 
 from app.core.config import settings
 from app.models.user import User
@@ -37,7 +37,7 @@ class TokenManager:
             "exp": datetime.utcnow() + expires_delta,  # expiration
             "is_superadmin": user.is_superadmin,
             "is_active": user.is_active,
-            "jti": str(UUID.uuid4())  # unique token ID
+            "jti": str(uuid4())  # unique token ID
         }
 
         # Firma el token con el algoritmo especificado

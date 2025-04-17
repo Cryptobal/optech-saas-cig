@@ -1,30 +1,61 @@
-from datetime import datetime
 from typing import Optional
-from uuid import UUID
-from pydantic import BaseModel
+from datetime import datetime
+from pydantic import BaseModel, validator
+import re
+
+def validar_rut(rut: str) -> bool:
+    """Valida el formato y dígito verificador de un RUT chileno."""
+    rut = rut.upper().replace(".", "").replace("-", "")
+    if not re.match(r'^[0-9]+[0-9Kk]$', rut):
+        return False
+    
+    cuerpo = rut[:-1]
+    dv = rut[-1]
+    
+    suma = 0
+    multiplicador = 2
+    
+    for c in reversed(cuerpo):
+        suma += int(c) * multiplicador
+        multiplicador = multiplicador + 1 if multiplicador < 7 else 2
+    
+    resto = suma % 11
+    dv_calculado = str(11 - resto) if resto > 1 else 'K'
+    
+    return dv.upper() == dv_calculado
 
 class TenantBase(BaseModel):
-    nombre: str
+    name: str
     rut: str
-    estado: bool = True
-    plan_subscripcion: Optional[str] = None
-    configuracion: Optional[dict] = None
+    is_active: bool = True
+
+    @validator('rut')
+    def validate_rut(cls, v):
+        v = v.upper().replace(".", "").replace("-", "")
+        if not validar_rut(v):
+            raise ValueError('RUT inválido')
+        return v
 
 class TenantCreate(TenantBase):
     pass
 
 class TenantUpdate(BaseModel):
-    nombre: Optional[str] = None
+    name: Optional[str] = None
     rut: Optional[str] = None
-    estado: Optional[bool] = None
-    plan_subscripcion: Optional[str] = None
-    configuracion: Optional[dict] = None
+    is_active: Optional[bool] = None
+
+    @validator('rut')
+    def validate_rut(cls, v):
+        if v is not None:
+            v = v.upper().replace(".", "").replace("-", "")
+            if not validar_rut(v):
+                raise ValueError('RUT inválido')
+        return v
 
 class TenantInDBBase(TenantBase):
-    id: UUID
-    fecha_creacion: datetime
+    id: int
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
